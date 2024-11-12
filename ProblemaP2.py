@@ -7,8 +7,12 @@ import sys
 def encontrarCelula(lista_adyacencias):
     return lista_adyacencias
 
-def calcular_distancia(x1, y1, x2, y2):
+def calcular_distancia_manhattan(x1, y1, x2, y2):
+    return abs(x2 - x1) + abs(y2 - y1)
+
+def calcular_distancia_euclidiana(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** (1/2)
+
     
 def main():
     lista_adyacencias = {}
@@ -35,7 +39,7 @@ def main():
             for j in range(i + 1, numCelulas):
                 id2, x2, y2, tipo2, peptidos2 = celulas[j]
                 
-                distancia = calcular_distancia(x1, y1, x2, y2)
+                distancia = calcular_distancia_euclidiana(x1, y1, x2, y2)
                 
                 if distancia <= dist:
                     # Contar péptidos comunes
