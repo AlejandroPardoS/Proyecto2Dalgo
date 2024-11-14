@@ -89,7 +89,7 @@ def edmonds_karp(grafo, nodoInit, nodoFinit):
 
     return max_flow
 
-print(edmonds_karp({"s": [("1",float('inf')), ("2",float('inf'))], "t": [], "1": [(3, 2), (4, 1)], "2": [(4, 1), (5, 3)], "3": [(1, 2), (4, 3), (5, 1), (6, 3)], "4": [(1, 1), (2, 1), (3, 3), (5, 1), (6, 2), (7, 2)], "5": [], "6": [(3, 3), (4, 2), (5, 3), ("t", float('inf'))], "7": [(4, 2), (5, 1), ("t", float('inf'))]}, "s", "t"))
+#print(edmonds_karp({"s": [("1",float('inf')), ("2",float('inf'))], "t": [], "1": [(3, 2), (4, 1)], "2": [(4, 1), (5, 3)], "3": [(1, 2), (4, 3), (5, 1), (6, 3)], "4": [(1, 1), (2, 1), (3, 3), (5, 1), (6, 2), (7, 2)], "5": [], "6": [(3, 3), (4, 2), (5, 3), ("t", float('inf'))], "7": [(4, 2), (5, 1), ("t", float('inf'))]}, "s", "t"))
 #print(edmonds_karp({"s": [("1",float('inf')), ("2",float('inf'))], "t": [], "1": [(3, 2)], "2": [(5, 3)], "3": [(1, 2), (4, 3)], "4": [], "5": [(2, 3), (4, 1), (7, 1)], "6": [(4, 2), ("t", float('inf'))], "7": [(5, 1), ("t", float('inf'))]}, "s", "t"))
 
 
@@ -128,20 +128,25 @@ def main():
                         crearArcos(lista_adyacencias, id, nodoAnterior, capacidad)
                     elif (tipo == 2 and tipoAnterior == 1):
                         crearArcos(lista_adyacencias, nodoAnterior, id, capacidad)
+                        crearArcos(lista_adyacencias, id, nodoAnterior, capacidad)
                     elif (tipo == 2 and tipoAnterior == 3):
                         crearArcos(lista_adyacencias, id, nodoAnterior, capacidad)
                     elif (tipo == 3 and tipoAnterior == 2):
                         crearArcos(lista_adyacencias, nodoAnterior, id, capacidad)
+                        crearArcos(lista_adyacencias, id, nodoAnterior, capacidad)
                     elif (tipo == 2 and tipoAnterior == 2):
                         crearArcos(lista_adyacencias, id, nodoAnterior, capacidad)
-                        crearNodoAux(lista_adyacencias, nodoAnterior, id, capacidad)
+                        crearArcos(lista_adyacencias, nodoAnterior, id, capacidad)
+                        #crearNodoAux(lista_adyacencias, nodoAnterior, id, capacidad)
             #print(encontrarCelula(lista_adyacencias))
-        print(lista_adyacencias)
-        listaResultados.append(edmonds_karp(lista_adyacencias, "s", "t"))
-        print(listaResultados)
+        print("LISTA", lista_adyacencias)
+        flujo_total = edmonds_karp(lista_adyacencias, "s", "t")
+        #encontrar la celula de bloqueo
+        #print(id_celula_bloqueo, flujo_total, flujo_sin_celula_bloqueo)
+        lista_adyacencias = {}
         linea = sys.stdin.readline()
         
-#main()
+main()
 
 """def main():
     lista_adyacencias = {}
