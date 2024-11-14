@@ -3,41 +3,27 @@
 # Alejandro Lancheros
 
 import sys
-"""
-@author: josep
+import copy
 
-Asumo que:
-Todos los nodos los dan desde 1 de forma ascendente, sin saltos: No
-Que estos siempre van a estar ordenados recorriendo primero los tipo 1, 2 y 3: No
-No van a haber nodos volando, o sea, que no tengan conexion con el grafo: Si
-No hay sub grafos: Si hay pero con S se soluciona
-Todas las distancias o posiciones son Enteros positivos: No
-Los indicadores de los nodos son positivos: Si
-"""
-
-#============================ Grafo ============================#
-def crearNodo(grafo: dict, nodo: str) -> None:
+def crearNodo(grafo, nodo):
     if nodo not in grafo:
         grafo[nodo] = []
 
-def crearArcos(grafo: dict, nodoOrigen: str, nodoFinal: str, capacidad: int) -> None:
+def crearArcos(grafo, nodoOrigen, nodoFinal, capacidad):
     if nodoOrigen in grafo and nodoFinal not in grafo[nodoOrigen]:
-        grafo[nodoOrigen].append((nodoFinal, capacidad))
+        if nodoFinal == "t" or nodoOrigen == "s":
+            grafo[nodoOrigen].append((nodoFinal, capacidad))
+        else:
+            grafo[nodoOrigen].append((int(nodoFinal), capacidad))
+            
+def calcularDistancia(x1, y1, x2, y2):
+    return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** (1/2)
 
-def crearNodoAux(grafo: dict, nodoAnterior: str, nodoActual: str, capacidad) -> None:
-    crearNodo(grafo, nodoAnterior+"-"+nodoActual)
-    crearArcos(grafo, nodoAnterior, nodoAnterior+"-"+nodoActual, capacidad)
-    crearArcos(grafo, nodoAnterior+"-"+nodoActual, nodoActual, capacidad)
+def calcularCapacidad(peptidos1, peptidos2):
+    return len(set(peptidos1).intersection(set(peptidos2)))
 
-#============================ Calculos ============================#
-def calcularDistancia(x1: int, y1: int, x2: int, y2: int) -> float:
-    return ((x2 - x1) ** 2 + (y2 - y1) ** 2)**(1/2)
 
-def calcularCapacidad(peptidosActuales: list, peptidosAnteriores: list) -> int:
-    return len(set(peptidosActuales) & set(peptidosAnteriores))
-
-#============================ Algotimos sobre el grafo ============================#
-def bfs(grafo: dict, nodoInit: str, nodoFinit: str) -> dict:
+def bfs(grafo, nodoInit, nodoFinit):
     camino = {nodoInit: None} 
     cola = [nodoInit]  
 
@@ -57,7 +43,6 @@ def bfs(grafo: dict, nodoInit: str, nodoFinit: str) -> dict:
 
 def edmonds_karp(grafo, nodoInit, nodoFinit):
     max_flow = 0 
-
     while True:
         parent = bfs(grafo, nodoInit, nodoFinit)
         if parent is None:
@@ -94,7 +79,7 @@ def edmonds_karp(grafo, nodoInit, nodoFinit):
 
 
 def main():
-    listaResultados = []
+    calculadoras = []
     lista_adyacencias = {}
     ncasos = int(sys.stdin.readline().strip())
     linea = sys.stdin.readline() 
@@ -114,9 +99,10 @@ def main():
             peptidos = linea[4:]
             celulas.append((id, x, y, tipo, peptidos))
             crearNodo(lista_adyacencias, id)
-            #lista_adyacencias[id] = []
             if tipo == 1:
                 crearArcos(lista_adyacencias, "s", id, float('inf'))
+            elif tipo == 2:
+                calculadoras.append(id)
             elif tipo == 3:
                 crearArcos(lista_adyacencias, id, "t", float('inf'))
             #armar el grafo
@@ -139,11 +125,27 @@ def main():
                         crearArcos(lista_adyacencias, nodoAnterior, id, capacidad)
                         #crearNodoAux(lista_adyacencias, nodoAnterior, id, capacidad)
             #print(encontrarCelula(lista_adyacencias))
-        print("LISTA", lista_adyacencias)
+        #print("LISTA", lista_adyacencias)
+        lista_adyacencias_copy = copy.deepcopy(lista_adyacencias)
+        #print("ANTES", lista_adyacencias_copy)
         flujo_total = edmonds_karp(lista_adyacencias, "s", "t")
+        #print("DESPUES", lista_adyacencias_copy)
+        flujo_sin_celula_bloqueo = float('inf')
+        for id_calculadora in calculadoras:
+            nuevaLista = copy.deepcopy(lista_adyacencias_copy)
+            nuevaLista[id_calculadora] = []
+            #print(nuevaLista)
+            flujo = edmonds_karp(nuevaLista, "s", "t")
+            nuevaLista = lista_adyacencias_copy
+            #print(id_calculadora, flujo)
+            if flujo < flujo_sin_celula_bloqueo:
+                id_celula_bloqueo = id_calculadora
+                flujo_sin_celula_bloqueo = flujo
+                
         #encontrar la celula de bloqueo
-        #print(id_celula_bloqueo, flujo_total, flujo_sin_celula_bloqueo)
+        print(id_celula_bloqueo, flujo_total, flujo_sin_celula_bloqueo)
         lista_adyacencias = {}
+        calculadoras = []
         linea = sys.stdin.readline()
         
 main()
