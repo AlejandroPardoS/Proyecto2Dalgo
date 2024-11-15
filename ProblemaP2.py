@@ -88,13 +88,18 @@ def edmonds_karp(lista_adyacencias, nodo1, nodo2):
 
 def main():
     calculadoras = []
+    calculadoras_potenciales = []
     lista_adyacencias = {}
+    tipo_celulas = {}
     ncasos = int(sys.stdin.readline().strip())
     linea = sys.stdin.readline() 
     for i in range(0, ncasos):
         try :
             numCelulas, dist = linea.split()
             numCelulas, dist = int(numCelulas), int(dist)
+            #if numCelulas > 4000:
+            #    print("No creemos que nuestro algoritmo resuelva en el tiempo esperado este caso")
+            #    continue
             celulas = []
             crearNodo(lista_adyacencias, "i")
             crearNodo(lista_adyacencias, "f")
@@ -107,15 +112,25 @@ def main():
                 tipo = int(linea[3])
                 peptidos = linea[4:]
                 celulas.append((id, x, y, tipo, peptidos))
+                tipo_celulas[str(id)] = tipo
                 crearNodo(lista_adyacencias, id)
                 if tipo == 1:
                     crearArcos(lista_adyacencias, "i", id, float('inf'))
-                elif tipo == 2:
-                    calculadoras.append(id)
+                #elif tipo == 2:
+                #    calculadoras.append(id)
                 elif tipo == 3:
                     crearArcos(lista_adyacencias, id, "f", float('inf'))
                 
                 for id1, x1, y1, tipo1, peptidos1 in celulas[:-1]:
+                    if (tipo == 1 and tipo1 == 1):
+                        continue
+                    if (tipo == 1 and tipo1 == 3):
+                        continue
+                    if (tipo == 3 and tipo1 == 3):
+                        continue
+                    if (tipo == 3 and tipo1 == 1):
+                        continue
+
                     capacidad = calcularCapacidad(peptidos, peptidos1)
 
                     if calcular_distancia_manhattan(x1, y1, x, y) <= dist and capacidad>0:
@@ -131,11 +146,29 @@ def main():
                             crearArcos(lista_adyacencias, id, id1, capacidad)
                         elif (tipo == 2 and tipo1 == 2):
                             crearArcos(lista_adyacencias, id, id1, capacidad)
-                            crearArcos(lista_adyacencias, id1, id, capacidad)                
+                            crearArcos(lista_adyacencias, id1, id, capacidad)
+                
+                if tipo == 2 and id not in calculadoras:
+                    calculadoras.append(id)
+                
+            for id in calculadoras:    
+                tuplas = lista_adyacencias[id]
+                #print("TUPLAS" , tuplas)
+                #print("TIPOS", tipo_celulas)
+                if tuplas != []:
+                    for id2, capacidad2 in tuplas:
+                        if capacidad2 > 0 and tipo_celulas[str(id2)] == 3 and id not in calculadoras_potenciales:
+                            calculadoras_potenciales.append(id)
+                #calculadoras.append(id)
+                            
+                                
             
             flujo_sin_celula_bloqueo = float('inf')
             nuevaLista = copy.deepcopy(lista_adyacencias)
-            for id_calculadora in calculadoras:
+            #print(calculadoras_potenciales)
+            for id_calculadora in calculadoras_potenciales:
+                #if lista_adyacencias[id_calculadora] == []:
+                #    continue
                 original = nuevaLista[id_calculadora]
                 nuevaLista[id_calculadora] = []
                 flujo = edmonds_karp(nuevaLista, "i", "f")
@@ -149,10 +182,13 @@ def main():
             
             flujo_total = edmonds_karp(lista_adyacencias, "i", "f")        
             print(id_celula_bloqueo, flujo_total, flujo_sin_celula_bloqueo)
+            #print(flujo_total)
         except:
             print("Error")
         lista_adyacencias = {}
+        tipo_celulas = {}
         calculadoras = []
+        calculadoras_potenciales = []
         linea = sys.stdin.readline()
         
 main()
